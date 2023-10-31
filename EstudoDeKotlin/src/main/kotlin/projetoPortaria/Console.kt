@@ -3,7 +3,7 @@ package projetoPortaria
 class Console {
     fun readInt(msg: String): Int {
         var retorno: Int? = null
-        while (retorno == null) {
+        while (retorno == null || retorno <= 0) {
             print(msg)
             val info = readlnOrNull()
 
