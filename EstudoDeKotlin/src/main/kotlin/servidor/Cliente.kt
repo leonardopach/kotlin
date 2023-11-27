@@ -1,27 +1,28 @@
 package servidor
 
+import java.net.Socket
+import java.util.Scanner
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintWriter
-import java.net.Socket
-import java.net.SocketException
-import java.util.*
-import kotlin.concurrent.thread
+import java.io.IOException
 
 fun main() {
-    var clientSocket: Socket? = null
+    val clientSocket = Socket("localhost", 12345)
+
+    val usernameInput = Scanner(System.`in`)
+    print("Digite seu nome de usuário: ")
+    val username = usernameInput.nextLine()
+
+    val output = PrintWriter(clientSocket.getOutputStream(), true)
 
     try {
-        clientSocket = Socket("localhost", 12345)
-        val output = PrintWriter(clientSocket.getOutputStream(), true)
-
-        print("Digite seu nome de usuário: ")
-        val username: String? = readlnOrNull()
+        // Envie o nome de usuário do cliente para o servidor
         output.println(username)
 
-        val input = BufferedReader(InputStreamReader(clientSocket.getInputStream()))
-
-        val receiveThread = thread {
+        // Inicie uma thread para receber mensagens
+        val receiveThread = Thread {
+            val input = BufferedReader(InputStreamReader(clientSocket.getInputStream()))
             try {
                 while (true) {
                     val mensagem = input.readLine()
@@ -30,43 +31,25 @@ fun main() {
                     }
                 }
             } catch (e: Exception) {
-                // Lidar com exceções na thread de recepção
-                e.printStackTrace()
+                println("Encerrado com sucesso!!")
             }
         }
+        receiveThread.start()
 
-        val sendThread = thread {
-            try {
-                while (true) {
-                    val mensagem: String? = readlnOrNull()
-                    if (mensagem != null) {
-                        if (mensagem.lowercase(Locale.getDefault()) == "quit") {
-                            output.println(mensagem)
-                            receiveThread.interrupt() // Para interromper a thread de recepção
-                            break // Sair do loop
-                        }
-                        output.println(mensagem)
-                    }
-                }
-            } catch (e: Exception) {
-                // Lidar com exceções na thread de envio
-                e.printStackTrace()
-            } finally {
-                // Feche o socket quando o programa terminar
-                try {
-                    clientSocket.close()
-                } catch (ignore: SocketException) {
-                    // Ignore a exceção se o socket já estiver fechado
-                }
+        // Loop para enviar mensagens
+        val scanner = Scanner(System.`in`)
+        while (true) {
+            val mensagem = scanner.nextLine()
+            val outputt = PrintWriter(clientSocket.getOutputStream(), true)
+            outputt.println(mensagem)
+
+            // Verifique se o usuário digitou "quit" e, se sim, desconecte
+            if (mensagem.equals("quit", ignoreCase = true)) {
+                clientSocket.close()
+                break
             }
         }
-        sendThread.join() // Aguarde a thread de envio terminar
-    } catch (e: SocketException) {
-        // Lidar com exceções na conexão de socket
+    } catch (e: IOException) {
         e.printStackTrace()
-    } finally {
-        // Feche o socket quando o programa terminar
-        clientSocket?.close()
     }
 }
-

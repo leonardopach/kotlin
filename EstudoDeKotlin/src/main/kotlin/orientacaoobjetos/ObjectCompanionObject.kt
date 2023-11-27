@@ -8,7 +8,7 @@ class Matematica {
         fun teste() {}
     }
 
-    object obj1 {
+    object Obj1 {
         const val PI: Float = 3.1415f
     }
 }
@@ -18,5 +18,5 @@ fun main() {
     println( Matematica.teste())
     val m: Matematica = Matematica()
 
-    println(Matematica.obj1.PI)
+    println(Matematica.Obj1.PI)
 }

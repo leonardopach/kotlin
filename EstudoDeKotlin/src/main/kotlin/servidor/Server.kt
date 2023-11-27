@@ -21,8 +21,6 @@ fun main() {
         val output = PrintWriter(clientSocket.getOutputStream(), true)
 
         val username = input.readLine()
-        println("$username se juntou ao chat.")
-
         for (cliente in clientesConectados) {
             cliente.println("$username se juntou ao chat.")
         }
@@ -31,7 +29,6 @@ fun main() {
         thread {
             while (true) {
                 val message = input.readLine() ?: break
-                println("$username: $message")
                 for (cliente in clientesConectados) {
                     cliente.println("$username: $message")
                 }
